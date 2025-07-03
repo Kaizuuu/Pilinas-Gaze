@@ -1,0 +1,102 @@
+body {
+  background: linear-gradient(120deg, #f4f4f4 60%, #ffb300 100%);
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+}
+
+.transparent-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(26,34,51,0.4);
+  display: flex;
+  align-items: center;
+  padding: 16px 40px;
+  z-index: 1000;
+  box-shadow: none;
+}
+
+.transparent-navbar .logo {
+  font-size: 1.7em;
+  font-weight: bold;
+  color: #ffb300;
+  margin-right: 40px;
+}
+
+.transparent-navbar nav {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.transparent-navbar a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.1em;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.transparent-navbar a:hover,
+.transparent-navbar a.active {
+  background: rgba(255,179,0,0.15);
+  color: #ffb300;
+}
+
+.recommended-islands {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  padding: 40px;
+  margin-top: 60px;
+}
+
+.island-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  padding: 24px;
+  width: 260px;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.island-card:hover {
+  transform: translateY(-8px) scale(1.03);
+}
+
+.island-card img {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.island-card h3 {
+  margin: 0 0 8px 0;
+  color: #1a2233;
+}
+
+.island-card p {
+  color: #555;
+  font-size: 1em;
+}
+
+.logout-button {
+  margin-left: auto;
+  padding: 8px 12px;
+  background-color: #ffb300;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: #e0a800;
+}

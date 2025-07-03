@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Philippine Gaze - Mindanao</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .location-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      padding: 40px;
+    }
+    .location-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+      text-align: center;
+      transition: transform 0.2s;
+      position: relative;
+    }
+    .location-card:hover {
+      transform: scale(1.03);
+    }
+    .location-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .location-card h3 {
+      margin: 16px 0 8px;
+      font-size: 1.3rem;
+    }
+    .location-card p {
+      padding: 0 12px 16px;
+      color: #444;
+    }
+    .logout-button {
+      margin-left: auto;
+      margin-right: 16px;
+      background-color: #ffb300;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .logout-button:hover {
+      background-color: #e09b00;
+    }
+    .favorite-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255,255,255,0.9);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 1.2em;
+      color: #ff5252;
+    }
+    #searchInput {
+      display: block;
+      margin: 140px auto 20px;
+      padding: 10px 16px;
+      font-size: 1rem;
+      width: 80%;
+      max-width: 500px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDoijFlD_hJ2mp4FstfSZO4qUPKIzEdmPs",
+      authDomain: "hello-e7a6d.firebaseapp.com",
+      projectId: "hello-e7a6d",
+      storageBucket: "hello-e7a6d.appspot.com",
+      messagingSenderId: "693146874206",
+      appId: "1:693146874206:web:d37f7a3c823fcba4401fcf"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+          firebase.auth().signOut().then(() => {
+            alert("You have been logged out.");
+            window.location.href = "login.html";
+          });
+        });
+      }
+
+      // Search filtering
+      document.getElementById("searchInput")?.addEventListener("input", e => {
+        const value = e.target.value.toLowerCase();
+        document.querySelectorAll(".location-card").forEach(card => {
+          const title = card.querySelector("h3").textContent.toLowerCase();
+          const desc = card.querySelector("p").textContent.toLowerCase();
+          card.style.display = title.includes(value) || desc.includes(value) ? "block" : "none";
+        });
+      });
+
+      // Favorite saving
+      document.querySelectorAll(".favorite-btn").forEach(button => {
+        button.addEventListener("click", async e => {
+          const card = e.target.closest(".location-card");
+          const title = card.querySelector("h3").textContent;
+          const desc = card.querySelector("p").textContent;
+          const img = card.querySelector("img").getAttribute("src");
+          const user = firebase.auth().currentUser;
+
+          if (!user) return alert("Please log in to save favorites.");
+
+          try {
+            await db.collection("favorites").add({
+              uid: user.uid,
+              title,
+              desc,
+              img
+            });
+            alert(`Saved "${title}" to your favorites!`);
+          } catch (err) {
+            console.error("Error saving favorite:", err);
+          }
+        });
+      });
+    });
+  </script>
+</head>
+<body>
+  <header class="transparent-navbar">
+    <div class="logo">Philippine Gaze</div>
+    <nav>
+      <button id="logoutBtn" class="logout-button">Logout</button>
+      <a href="index.html">Home</a>
+      <a href="main.html">Main</a>
+      <a href="luzon.html">Luzon</a>
+      <a href="visayas.html">Visayas</a>
+      <a href="mindanao.html" class="active">Mindanao</a>
+    </nav>
+  </header>
+
+  <input type="text" id="searchInput" placeholder="Search Mindanao destinations...">
+
+  <main>
+    <h2 style="text-align:center;">Explore Mindanao</h2>
+    <section class="location-grid">
+      <div class="location-card">
+        <button class="favorite-btn">❤</button>
+        <img src="assets/davao.jpg" alt="Davao">
+        <h3>Davao</h3>
+        <p>Home of Mount Apo, durian, and the Philippine Eagle Center.</p>
+      </div>
+      <div class="location-card">
+        <button class="favorite-btn">❤</button>
+        <img src="assets/siargao.jpg" alt="Siargao">
+        <h3>Siargao</h3>
+        <p>Surfing capital of the Philippines with lagoons and island hopping.</p>
+      </div>
+      <div class="location-card">
+        <button class="favorite-btn">❤</button>
+        <img src="assets/zamboanga.jpg" alt="Zamboanga">
+        <h3>Zamboanga</h3>
+        <p>Rich in Spanish influence, known for colorful vintas and pink beach.</p>
+      </div>
+      <div class="location-card">
+        <button class="favorite-btn">❤</button>
+        <img src="assets/camiguin.jpg" alt="Camiguin">
+        <h3>Camiguin</h3>
+        <p>An island born of fire, with volcanoes, springs, and sunken cemetery.</p>
+      </div>
+      <div class="location-card">
+        <button class="favorite-btn">❤</button>
+        <img src="assets/cotabato.jpg" alt="Cotabato">
+        <h3>Cotabato</h3>
+        <p>Explore Asik-Asik Falls and scenic nature destinations.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

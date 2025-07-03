@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Philippine Gaze - Luzon</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .location-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      padding: 40px;
+    }
+    .location-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+      text-align: center;
+      transition: transform 0.2s;
+      position: relative;
+    }
+    .location-card:hover {
+      transform: scale(1.03);
+    }
+    .location-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .location-card h3 {
+      margin: 16px 0 8px;
+      font-size: 1.3rem;
+    }
+    .location-card p {
+      padding: 0 12px 16px;
+      color: #444;
+    }
+    .logout-button {
+      margin-left: auto;
+      margin-right: 16px;
+      background-color: #ffb300;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .logout-button:hover {
+      background-color: #e09b00;
+    }
+    .favorite-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255,255,255,0.9);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 1.2em;
+      color: #ccc;
+    }
+    .favorite-btn.favorited {
+      color: #ff5252;
+    }
+    #searchInput {
+      display: block;
+      margin: 140px auto 20px;
+      padding: 10px 16px;
+      font-size: 1rem;
+      width: 80%;
+      max-width: 500px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+  <script>
+  firebase.auth().onAuthStateChanged((user) => {
+    if (!user) {
+      alert("You are not logged in. Redirecting to login page.");
+      window.location.href = "login.html";
+    }
+  });
+</script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDoijFlD_hJ2mp4FstfSZO4qUPKIzEdmPs",
+      authDomain: "hello-e7a6d.firebaseapp.com",
+      projectId: "hello-e7a6d",
+      storageBucket: "hello-e7a6d.appspot.com",
+      messagingSenderId: "693146874206",
+      appId: "1:693146874206:web:d37f7a3c823fcba4401fcf"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        alert("You are not logged in. Redirecting to login page.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      const userRef = db.collection("users").doc(user.uid);
+      const doc = await userRef.get();
+
+      // If user document doesn't exist, create it with defaults
+      if (!doc.exists) {
+        await userRef.set({
+          email: user.email || "",
+          username: user.displayName || "",
+          favorites: []
+        });
+      }
+
+      const userFavorites = (await userRef.get()).data().favorites || [];
+
+      document.querySelectorAll(".location-card").forEach(card => {
+        const title = card.querySelector("h3").textContent;
+        const favBtn = card.querySelector(".favorite-btn");
+
+        if (userFavorites.some(fav => fav.title === title)) {
+          favBtn.classList.add("favorited");
+        }
+
+        favBtn.addEventListener("click", async () => {
+          const desc = card.querySelector("p").textContent;
+          const img = card.querySelector("img").getAttribute("src");
+          let favorites = userFavorites.slice();
+          const index = favorites.findIndex(fav => fav.title === title);
+
+          if (index === -1) {
+            favorites.push({ title, desc, img });
+            favBtn.classList.add("favorited");
+            alert(`Saved "${title}" to your favorites!`);
+          } else {
+            favorites.splice(index, 1);
+            favBtn.classList.remove("favorited");
+            alert(`Removed "${title}" from your favorites.`);
+          }
+
+          await userRef.update({ favorites });
+        });
+      });
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("logoutBtn")?.addEventListener("click", () => {
+        auth.signOut().then(() => {
+          alert("You have been logged out.");
+          window.location.href = "login.html";
+        });
+      });
+
+      document.getElementById("searchInput")?.addEventListener("input", e => {
+        const value = e.target.value.toLowerCase();
+        document.querySelectorAll(".location-card").forEach(card => {
+          const title = card.querySelector("h3").textContent.toLowerCase();
+          const desc = card.querySelector("p").textContent.toLowerCase();
+          card.style.display = title.includes(value) || desc.includes(value) ? "block" : "none";
+        });
+      });
+    });
+  </script>
+</head>
+<body>
+  <header class="transparent-navbar">
+    <div class="logo">Philippine Gaze</div>
+    <nav>
+      <button id="logoutBtn" class="logout-button">Logout</button>
+      <a href="index.html">Home</a>
+      <a href="main.html">Main</a>
+      <a href="luzon.html" class="active">Luzon</a>
+      <a href="visayas.html">Visayas</a>
+      <a href="mindanao.html">Mindanao</a>
+    </nav>
+  </header>
+
+  <input type="text" id="searchInput" placeholder="Search Luzon destinations...">
+
+  <main>
+    <h2 style="text-align:center;">Explore Luzon</h2>
+    <section class="location-grid">
+      <div class="location-card">
+        <button class="favorite-btn">❤</button>
+        <img src="assets/baguio.jpg" alt="Baguio">
+        <h3>Baguio</h3>
+        <p>The Summer Capital of the Philippines with cool breeze and pine trees.</p>
+      </div>
+      <div class="location-card">
+        <button class="favorite-btn">❤</button>
+        <img src="assets/vigan.jpg" alt="Vigan">
+        <h3>Vigan</h3>
+        <p>Colonial charm with cobblestone streets and heritage houses.</p>
+      </div>
+      <div class="location-card">
+        <button class="favorite-btn">❤</button>
+        <img src="assets/banaue.jpg" alt="Banaue">
+        <h3>Banaue Rice Terraces</h3>
+        <p>2,000-year-old terraces carved into the mountains of Ifugao.</p>
+      </div>
+      <div class="location-card">
+        <button class="favorite-btn">❤</button>
+        <img src="assets/tagaytay.jpg" alt="Tagaytay">
+        <h3>Tagaytay</h3>
+        <p>Chill climate with a view of Taal Volcano and good eats.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

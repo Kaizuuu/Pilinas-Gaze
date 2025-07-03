@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Favorites</title>
+  <link rel="stylesheet" href="favorites.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <header class="transparent-navbar">
+    <div class="logo">Philippine Gaze</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="main.html">Main</a>
+      <a href="favorites.html" class="active">Favorites</a>
+      <button id="logoutBtn" class="logout-button">Logout</button>
+    </nav>
+  </header>
+
+  <main>
+    <h2 style="text-align: center; margin-top: 100px;">My Favorite Places</h2>
+    <section class="recommended-islands" id="favoritesList">
+      <!-- Favorite cards will appear here -->
+    </section>
+  </main>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDoijFlD_hJ2mp4FstfSZO4qUPKIzEdmPs",
+      authDomain: "hello-e7a6d.firebaseapp.com",
+      projectId: "hello-e7a6d",
+      storageBucket: "hello-e7a6d.appspot.com",
+      messagingSenderId: "693146874206",
+      appId: "1:693146874206:web:d37f7a3c823fcba4401fcf"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        alert("You must be logged in to view favorites.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      const userDoc = await db.collection("users").doc(user.uid).get();
+      const favorites = userDoc.data().favorites || [];
+      const container = document.getElementById("favoritesList");
+
+      if (favorites.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#666;">You have no favorites yet.</p>';
+        return;
+      }
+
+      favorites.forEach(place => {
+        const card = document.createElement("div");
+        card.className = "island-card";
+        card.innerHTML = `
+          <img src="${place.image}" alt="${place.name}">
+          <h3>${place.name}</h3>
+          <p>${place.description}</p>
+        `;
+        container.appendChild(card);
+      });
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      auth.signOut().then(() => {
+        alert("You have been logged out.");
+        window.location.href = "login.html";
+      });
+    });
+  </script>
+</body>
+</html>
